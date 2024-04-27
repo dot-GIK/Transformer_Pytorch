@@ -1,9 +1,14 @@
+import os 
+import sys
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+
 import wikipedia
 import random
+from global_variables.paths import PATH_RAW_DATA, PATH_DICT_RAW_DATA
 
 counter = 1
 wiki_dict = []
-def main():
+def wiki():
     '''
     This script helps me create a dataset from different sentences.
     '''
@@ -12,20 +17,20 @@ def main():
     global wiki_dict
     wikipedia.set_lang('ru')
 
-    with open('dataset.txt', 'r', encoding='utf-8') as t:
+    with open(PATH_RAW_DATA, 'r', encoding='utf-8') as t:
         data = t.read()
         data = data.replace('\\ufeff', '')
 
     wiki_keywords = random.choice(data.split(' '))
 
-    with open('dictionary.txt', 'r', encoding='utf-8') as d:
+    with open(PATH_DICT_RAW_DATA, 'r', encoding='utf-8') as d:
         dictionary = d.read()
         dictionary = dictionary.replace('\\ufeff', '')
         dictionary = dictionary.split(' ')        
 
-    if wiki_keywords in dictionary: main()
+    if wiki_keywords in dictionary: wiki()
     else: 
-        with open('dictionary.txt', 'a+', encoding='utf-8') as d:
+        with open(PATH_DICT_RAW_DATA, 'a+', encoding='utf-8') as d:
             d.write(' ' + wiki_keywords)
 
     print(wiki_keywords)
@@ -33,19 +38,19 @@ def main():
     try:
         print(counter)
         python_page = wikipedia.page(wiki_keywords)
-        with open('dataset.txt', 'a+', encoding='utf-8') as f:
+        with open(PATH_RAW_DATA, 'a+', encoding='utf-8') as f:
             f.write(python_page.summary)
         counter += 1
-        main()
+        wiki()
 
     except wikipedia.exceptions.DisambiguationError:
-        main()
+        wiki()
 
     except wikipedia.exceptions.PageError:
-        main()
+        wiki()
     
     except wikipedia.exceptions.WikipediaException:
-        main()
+        wiki()
 
 if __name__ == '__main__':
-    main()
+    wiki()

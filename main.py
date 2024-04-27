@@ -1,9 +1,20 @@
 import torch
-from devices import device
 import spacy
 import pickle
+from src.global_variables.devices import device
+from src.global_variables.paths import PATH_SAVE_MODEL, PATH_TOK_INP, PATH_TOK_OUT
+from src.model.transformer import Transformer
 
-def predict(model, input_sequence, max_length=15, SOS_token=2, EOS_token=3):
+
+def predict(model: Transformer, input_sequence: torch.tensor, max_length=15, SOS_token=2, EOS_token=3):
+    '''
+    Предсказание модели
+    Input:
+        model - Сама модель.
+        input_sequence - Входной текст.
+        max_length - Максимальный выходной размер текста.
+    '''
+    
     model.eval()
     y_input = torch.tensor([[SOS_token]], dtype=torch.long, device=device)
     num_tokens = len(input_sequence[0])
@@ -23,29 +34,30 @@ def predict(model, input_sequence, max_length=15, SOS_token=2, EOS_token=3):
 
 
 def main():
-    model = torch.load('data/transformer')
-    tokenizer_input = []
+    # 1. Загрузка модели и токенайзера
+    model = Transformer(num_tokens=90000, dim_model=512, num_heads=8, num_encoder_layers=6, num_decoder_layers=6, dropout_p=0.1).to(device)
+    model.load_state_dict(torch.load(PATH_SAVE_MODEL))
     nlp = spacy.load('ru_core_news_sm')
 
-    with open('data/tokenizer_input.txt', 'r', encoding='utf-8') as f:
-        tokenizer_input.append(f.readlines())
-    with open('data/tokenizer_output.pkl', 'rb') as f:
-        tokenizer_output = pickle.load(f)
-    tokenizer_input = tokenizer_input[0]
+    with open(PATH_TOK_INP, 'rb') as f:
+        tokenizer_input = pickle.load(f)
 
-    sentence = input()
+    with open(PATH_TOK_OUT, 'rb') as f:
+        tokenizer_output = pickle.load(f)
+
+    # 2. Подготовка входного текста 
+    sentence = 'высокоуровневый язык программирования.'
     sentence = nlp(sentence)
-    
     sentence_processed = []
     for i in sentence:
-        if f'{str(i)}\n'in tokenizer_input:
-            sentence_processed.append(tokenizer_input.index(f'{str(i)}\n'))
+        if str(i)in tokenizer_input:
+            sentence_processed.append(tokenizer_input.index(str(i)))
         else:
-            tokenizer_input.append(f'{str(i)}\n')
-            sentence_processed.append(tokenizer_input.index(f'{str(i)}\n'))
-    print(sentence_processed)
-
+            tokenizer_input.append(str(i))
+            sentence_processed.append(tokenizer_input.index(str(i)))
     sentence_processed = torch.tensor([sentence_processed], dtype=torch.long).to(device)
+
+    # 3. Model predict 
     result = predict(model, sentence_processed)
     sentence = ''
     for i in result:
