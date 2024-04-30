@@ -1,14 +1,6 @@
-import os 
-import sys
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-
-import torch
 import numpy as np
 import spacy
-import pickle
-from global_variables.devices import device
-from global_variables.errors import IncorrectDatasetSize
-from global_variables.paths import PATH_RAW_DATA 
+from ..global_variables.errors import IncorrectDatasetSize
 
 class Dataset:
     def __init__(self, file_path: str, max_len: int) -> None:
@@ -53,7 +45,7 @@ class Dataset:
         print("-"*25, 'GET DATA', "-"*25)
         return self.data
     
-    def creating_batches(self, data_property: str, batch_size: int, seq_len: int, step: int, num_of_datasets=2):
+    def creating_batches(self, data_property: str, batch_size: int, seq_len: int, step=1, num_of_datasets=2):
         '''
         THIRD STEP: Создание батчей из датасета.
         Input: 
@@ -122,32 +114,3 @@ class Dataset:
                 if i != length-1:
                     prepared_data = np.append(prepared_data, '[START]')
         return prepared_data
-    
-
-# Создание датасета.
-data = Dataset(PATH_RAW_DATA, 9000)
-data.create_data()
-data.conversion_to_tokens()
-dataset = data.creating_batches('phrase training', 25, 10, 1)
-dataset = data.get_data()
-dataset = dataset.astype(int)
-print(f"Итоговый размер датасета: {dataset.shape}")
-
-# Преобразование датасета в тензор. Создание словаря и списка для токенизации.
-dataset = torch.tensor(dataset, dtype=torch.long).to(device)
-tokenizer_output = data.tokenizer_output
-tokenizer_input = data.tokenizer_input
-
-# Сохранение tokenizer_output.
-tokenizer_output_path = os.path.join(sys.path[0], 'prepared_datasets\\tokenizer_output.pkl')
-with open(tokenizer_output_path, 'wb') as f:
-    pickle.dump(tokenizer_output, f)
-
-# Сохранение tokenizer_input.
-tokenizer_input_path = os.path.join(sys.path[0], 'prepared_datasets\\tokenizer_input.pkl')
-with open(tokenizer_input_path, 'wb') as f:
-    pickle.dump(tokenizer_input, f)
-    
-# Сохранение dataset.
-dataset_path = os.path.join(sys.path[0], 'prepared_datasets\\dataset.pt')
-torch.save(dataset, dataset_path)

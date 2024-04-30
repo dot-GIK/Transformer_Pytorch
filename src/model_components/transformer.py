@@ -18,7 +18,7 @@ class Transformer(nn.Module):
 
         self.model_type = "Transformer"
         self.dim_model = dim_model
-        self.positional_encoder = PositionalEncoding(dim_model=dim_model, dropout_p=dropout_p, max_len=90000)
+        self.positional_encoder = PositionalEncoding(dim_model=dim_model, dropout_p=dropout_p, max_len=num_tokens)
         self.embedding = nn.Embedding(num_tokens, dim_model)
 
         self.transformer = nn.Transformer(

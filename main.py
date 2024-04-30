@@ -3,10 +3,10 @@ import spacy
 import pickle
 from src.global_variables.devices import device
 from src.global_variables.paths import PATH_SAVE_MODEL, PATH_TOK_INP, PATH_TOK_OUT
-from src.model.transformer import Transformer
+from src.model_components.transformer import Transformer
 
 
-def predict(model: Transformer, input_sequence: torch.tensor, max_length=15, SOS_token=2, EOS_token=3):
+def predict(model: Transformer, input_sequence: torch.tensor, max_length=100, SOS_token=2, EOS_token=3):
     '''
     Предсказание модели
     Input:
@@ -35,7 +35,7 @@ def predict(model: Transformer, input_sequence: torch.tensor, max_length=15, SOS
 
 def main():
     # 1. Загрузка модели и токенайзера
-    model = Transformer(num_tokens=90000, dim_model=512, num_heads=8, num_encoder_layers=6, num_decoder_layers=6, dropout_p=0.1).to(device)
+    model = Transformer(num_tokens=23000, dim_model=512, num_heads=8, num_encoder_layers=6, num_decoder_layers=6, dropout_p=0.1).to(device)
     model.load_state_dict(torch.load(PATH_SAVE_MODEL))
     nlp = spacy.load('ru_core_news_sm')
 
@@ -46,7 +46,7 @@ def main():
         tokenizer_output = pickle.load(f)
 
     # 2. Подготовка входного текста 
-    sentence = 'высокоуровневый язык программирования.'
+    sentence = 'Python это'
     sentence = nlp(sentence)
     sentence_processed = []
     for i in sentence:
@@ -56,6 +56,7 @@ def main():
             tokenizer_input.append(str(i))
             sentence_processed.append(tokenizer_input.index(str(i)))
     sentence_processed = torch.tensor([sentence_processed], dtype=torch.long).to(device)
+    print(sentence_processed)
 
     # 3. Model predict 
     result = predict(model, sentence_processed)

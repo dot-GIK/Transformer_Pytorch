@@ -1,23 +1,9 @@
-import os
-import sys
-sys.path.append(os.path.join(sys.path[0], '..'))
-
 import torch
 from torch import nn
-from transformer import Transformer
-from global_variables.devices import device
-from global_variables.paths import PATH_DATASET, PATH_SAVE_MODEL
-
-dataset = torch.load(PATH_DATASET)
-
-# Загрузка модели, настройка оптимизатора и функции потерь.
-model = Transformer(num_tokens=90000, dim_model=512, num_heads=8, num_encoder_layers=6, num_decoder_layers=6, dropout_p=0.1).to(device)
-opt = torch.optim.SGD(model.parameters(), lr=0.01)
-# opt = torch.optim.Adam(model.parameters(), lr=0.01)
-loss_fn = nn.CrossEntropyLoss()
+from ..global_variables.devices import device
 
 
-def train_loop(model: Transformer, opt: torch.optim, loss_fn: nn, dataloader):
+def train_loop(model, opt: torch.optim, loss_fn: nn, dataloader):
     '''
     Обновление весов модели.
 
@@ -127,8 +113,6 @@ def fit(model, opt, loss_fn, train_dataloader, val_dataloader, epochs):
         
     return train_loss_list, validation_loss_list
 
-
-train_loss_list, validation_loss_list = fit(model, opt, loss_fn, dataset, dataset, 1)
-
 # Сохранение модели
-torch.save(model.state_dict(), PATH_SAVE_MODEL)
+def save_model(model, path: str):
+    torch.save(model.state_dict(), path)

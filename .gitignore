@@ -1,4 +1,7 @@
+__pycache__
 transformer
-tokenizer_input.txt
+tokenizer_input.pkl
 tokenizer_output.pkl
 dataset.pt
+main_training_model.py
+main.py
