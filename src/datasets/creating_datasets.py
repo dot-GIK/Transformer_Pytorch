@@ -21,7 +21,8 @@ class Dataset:
         print("-"*25, 'CREATE DATA', "-"*25)
         text = self.get_text_from_path(self.file_path)
         text = self.nlp(text)
-
+        print(f'Размер raw_data: {len(text)}')
+        
         # Изменение размера переменной text
         text = text[:self.max_len-1]
         if text[-1] != '.': text = np.append(text, '.')
@@ -88,6 +89,7 @@ class Dataset:
             self.tokenizer_output[i] = str(self.data[i])
             self.tokenizer_input.append(str(self.data[i]))
             self.data[i] = i
+
 
     def get_text_from_path(self, path: str) -> str:
         '''
